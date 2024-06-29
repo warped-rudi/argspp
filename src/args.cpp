@@ -9,7 +9,6 @@
 #include <iostream>
 #include <sstream>
 #include <deque>
-#include <set>
 
 using namespace std;
 using namespace args;
@@ -67,7 +66,7 @@ bool ArgStream::hasNext() {
 
 
 void ArgParser::flag(string const& name) {
-    Flag* flag = new Flag();
+    auto flag = make_shared<Flag>();
     stringstream stream(name);
     string alias;
     while (stream >> alias) {
@@ -77,7 +76,7 @@ void ArgParser::flag(string const& name) {
 
 
 void ArgParser::option(string const& name, string const& fallback) {
-    Option* option = new Option();
+    auto option = make_shared<Option>();
     option->fallback = fallback;
     stringstream stream(name);
     string alias;
@@ -143,7 +142,7 @@ ArgParser& ArgParser::command(
     string const& helptext,
     void (*callback)(string cmd_name, ArgParser& cmd_parser)) {
 
-    ArgParser *parser = new ArgParser();
+    auto parser = make_shared<ArgParser>();
     parser->helptext = helptext;
     parser->callback = callback;
 
@@ -313,7 +312,7 @@ void ArgParser::parse(ArgStream& stream) {
 
         // Is the argument a registered command?
         if (is_first_arg && commands.count(arg) > 0) {
-            ArgParser* command_parser = commands[arg];
+            ArgParser* command_parser = commands[arg].get();
             command_name = arg;
             command_parser->parse(stream);
             if (command_parser->callback != nullptr) {
@@ -395,7 +394,7 @@ void ArgParser::print() {
     if (options.size() > 0) {
         for (auto element: options) {
             cout << "  " << element.first << ": ";
-            Option *option = element.second;
+            Option *option = element.second.get();
             cout << "(" << option->fallback << ") ";
             cout << option->values;
             cout << "\n";
@@ -444,34 +443,3 @@ void ArgParser::exitVersion() {
     exit(0);
 }
 
-
-// -----------------------------------------------------------------------------
-// ArgParser: cleanup.
-// -----------------------------------------------------------------------------
-
-
-ArgParser::~ArgParser() {
-    set<Option*> unique_options;
-    for (auto element: options) {
-        unique_options.insert(element.second);
-    }
-    for (auto pointer: unique_options) {
-        delete pointer;
-    }
-
-    set<Flag*> unique_flags;
-    for (auto element: flags) {
-        unique_flags.insert(element.second);
-    }
-    for (auto pointer: unique_flags) {
-        delete pointer;
-    }
-
-    set<ArgParser*> unique_cmd_parsers;
-    for (auto element: commands) {
-        unique_cmd_parsers.insert(element.second);
-    }
-    for (auto pointer: unique_cmd_parsers) {
-        delete pointer;
-    }
-}

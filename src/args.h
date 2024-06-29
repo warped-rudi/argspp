@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace args {
 
@@ -25,8 +26,6 @@ namespace args {
                 std::string const& helptext = "",
                 std::string const& version = ""
             ) : helptext(helptext), version(version) {}
-
-            ~ArgParser();
 
             // Stores positional arguments.
             std::vector<std::string> args;
@@ -68,9 +67,9 @@ namespace args {
             void print();
 
         private:
-            std::map<std::string, Option*> options;
-            std::map<std::string, Flag*> flags;
-            std::map<std::string, ArgParser*> commands;
+            std::map<std::string, std::shared_ptr<Option> > options;
+            std::map<std::string, std::shared_ptr<Flag> > flags;
+            std::map<std::string, std::shared_ptr<ArgParser> > commands;
             std::string command_name;
 
             void parse(ArgStream& args);
