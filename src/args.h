@@ -23,8 +23,8 @@ namespace args {
     class ArgParser {
         public:
             ArgParser(
-                std::string const& helptext = "",
-                std::string const& version = ""
+                std::string const& helptext = std::string(),
+                std::string const& version = std::string()
             ) : helptext(helptext), version(version) {}
 
             // Stores positional arguments.
@@ -39,7 +39,8 @@ namespace args {
 
             // Register flags and options.
             void flag(std::string const& name);
-            void option(std::string const& name, std::string const& fallback = "");
+            void option(std::string const& name,
+                        std::string const& fallback = std::string());
 
             // Parse the application's command line arguments.
             void parse(int argc, char **argv);
@@ -54,7 +55,7 @@ namespace args {
             // Register a command. Returns the command's ArgParser instance.
             ArgParser& command(
                 std::string const& name,
-                std::string const& helptext = "",
+                std::string const& helptext = std::string(),
                 void (*callback)(std::string cmd_name, ArgParser& cmd_parser) = nullptr
             );
 
