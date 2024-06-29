@@ -71,6 +71,14 @@ namespace args {
             std::map<std::string, std::shared_ptr<Option> > options;
             std::map<std::string, std::shared_ptr<Flag> > flags;
             std::map<std::string, std::shared_ptr<ArgParser> > commands;
+
+            template<typename SmartPtrT>
+            static typename SmartPtrT::element_type *lookup(
+                    std::map<std::string, SmartPtrT> const& cnr, std::string const& key) {
+                auto it = cnr.find( key );
+                return it != cnr.end() ? it->second.get() : nullptr;
+            }
+
             std::string command_name;
 
             void parse(ArgStream& args);

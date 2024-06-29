@@ -97,32 +97,33 @@ bool ArgParser::found(string const& name) {
 
 
 int ArgParser::count(string const& name) {
-    if (flags.count(name) > 0) {
-        return flags[name]->count;
+    auto flag = lookup(flags, name);
+    if (flag) {
+        return flag->count;
     }
-    if (options.count(name) > 0) {
-        return options[name]->values.size();
+    auto option = lookup(options, name);
+    if (option) {
+        return option->values.size();
     }
     return 0;
 }
 
 
 string ArgParser::value(string const& name) {
-    if (options.count(name) > 0) {
-        if (!options[name]->values.empty()) {
-            return options[name]->values.back();
+    auto option = lookup(options, name);
+    if (option) {
+        if (!option->values.empty()) {
+            return option->values.back();
         }
-        return options[name]->fallback;
+        return option->fallback;
     }
     return string();
 }
 
 
 vector<string> ArgParser::values(string const& name) {
-    if (options.count(name) > 0) {
-        return options[name]->values;
-    }
-    return vector<string>();
+    auto option = lookup(options, name);
+    return option ? option->values : vector<string>();
 }
 
 
@@ -173,9 +174,10 @@ ArgParser& ArgParser::commandParser() {
 
 // Parse an option of the form --name=value or -n=value.
 void ArgParser::parseEqualsOption(string prefix, string name, string value) {
-    if (options.count(name) > 0) {
+    auto option = lookup(options, name);
+    if (option) {
         if (!value.empty()) {
-            options[name]->values.push_back(value);
+            option->values.push_back(value);
         } else {
             cerr << "Error: missing value for " << prefix << name << ".\n";
             exit(1);
@@ -195,14 +197,16 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
         return;
     }
 
-    if (flags.count(arg) > 0) {
-        flags[arg]->count++;
+    auto flag = lookup(flags, arg);
+    if (flag) {
+        flag->count++;
         return;
     }
 
-    if (options.count(arg) > 0) {
+    auto option = lookup(options, arg);
+    if (option) {
         if (stream.hasNext()) {
-            options[arg]->values.push_back(stream.next());
+            option->values.push_back(stream.next());
             return;
         } else {
             cerr << "Error: missing argument for --" << arg << ".\n";
@@ -234,14 +238,16 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
     for (char& c: arg) {
         string name = string(1, c);
 
-        if (flags.count(name) > 0) {
-            flags[name]->count++;
+        auto flag = lookup(flags, name);
+        if (flag) {
+            flag->count++;
             continue;
         }
 
-        if (options.count(name) > 0) {
+        auto option = lookup(options, name);
+        if (option) {
             if (stream.hasNext()) {
-                options[name]->values.push_back(stream.next());
+                option->values.push_back(stream.next());
                 continue;
             } else {
                 if (arg.size() > 1) {
@@ -305,8 +311,8 @@ void ArgParser::parse(ArgStream& stream) {
         }
 
         // Is the argument a registered command?
-        if (is_first_arg && commands.count(arg) > 0) {
-            ArgParser* command_parser = commands[arg].get();
+        ArgParser* command_parser = is_first_arg ? lookup(commands, arg) : nullptr;
+        if (command_parser) {
             command_name = arg;
             command_parser->parse(stream);
             if (command_parser->callback != nullptr) {
@@ -319,11 +325,12 @@ void ArgParser::parse(ArgStream& stream) {
         if (is_first_arg && arg == "help" && !commands.empty()) {
             if (stream.hasNext()) {
                 string name = stream.next();
-                if (commands.find(name) == commands.end()) {
+                command_parser = lookup(commands, name);
+                if (!command_parser) {
                     cerr << "Error: '" << name << "' is not a recognised command.\n";
                     exit(1);
                 } else {
-                    commands[name]->exitHelp();
+                    command_parser->exitHelp();
                 }
             } else {
                 cerr << "Error: the help command requires an argument.\n";
