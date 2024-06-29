@@ -16,11 +16,11 @@
 
 namespace args {
 
-    struct ArgStream;
-    struct Option;
-    struct Flag;
-
     class ArgParser {
+        struct Flag;
+        struct Option;
+        struct ArgStream;
+
         using Callback = void (*)(std::string cmd_name, ArgParser& cmd_parser);
 
         public:

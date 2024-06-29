@@ -19,12 +19,12 @@ using namespace args;
 // -----------------------------------------------------------------------------
 
 
-struct args::Flag {
+struct ArgParser::Flag {
     int count = 0;
 };
 
 
-struct args::Option {
+struct ArgParser::Option {
     vector<string> values;
     string fallback;
 };
@@ -35,29 +35,23 @@ struct args::Option {
 // -----------------------------------------------------------------------------
 
 
-struct args::ArgStream {
+struct ArgParser::ArgStream {
     deque<string> args;
-    void append(string const& arg);
-    string next();
-    bool hasNext();
+
+    void append(string const& arg) {
+        args.push_back(arg);
+    }
+
+    string next() {
+        string arg = args.front();
+        args.pop_front();
+        return arg;
+    }
+
+    bool hasNext() const {
+        return !args.empty();
+    }
 };
-
-
-void ArgStream::append(string const& arg) {
-    args.push_back(arg);
-}
-
-
-string ArgStream::next() {
-    string arg = args.front();
-    args.pop_front();
-    return arg;
-}
-
-
-bool ArgStream::hasNext() {
-    return !args.empty();
-}
 
 
 // -----------------------------------------------------------------------------
