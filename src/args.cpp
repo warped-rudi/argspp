@@ -109,7 +109,7 @@ size_t ArgParser::count(string const& name) const {
 }
 
 
-string ArgParser::value(string const& name) const {
+string const& ArgParser::value(string const& name) const {
     auto option = lookup(options, name);
     if (option) {
         if (!option->values.empty()) {
@@ -117,13 +117,18 @@ string ArgParser::value(string const& name) const {
         }
         return option->fallback;
     }
-    return string();
+    static const string empty;
+    return empty;
 }
 
 
-vector<string> ArgParser::values(string const& name) const {
+vector<string> const& ArgParser::values(string const& name) const {
     auto option = lookup(options, name);
-    return option ? option->values : vector<string>();
+    if (option) {
+        return option->values;
+    }
+    static const vector<string> empty;
+    return empty;
 }
 
 
@@ -132,8 +137,12 @@ size_t ArgParser::count() const {
 }
 
 
-string ArgParser::value(size_t index) const {
-    return index < args.size() ? args[index] : string();
+string const& ArgParser::value(size_t index) const {
+    if (index < args.size()) {
+        return args[index];
+    }
+    static const string empty;
+    return empty;
 }
 
 
@@ -170,7 +179,7 @@ bool ArgParser::commandFound() const {
 }
 
 
-string ArgParser::commandName() const {
+string const& ArgParser::commandName() const {
     return command_name;
 }
 
@@ -379,9 +388,9 @@ void ArgParser::parse(int argc, char **argv) {
 
 
 // Parse a vector of string arguments.
-void ArgParser::parse(vector<string> args) {
+void ArgParser::parse(vector<string> const& args) {
     ArgStream stream;
-    for (string& arg: args) {
+    for (auto& arg: args) {
         stream.append(arg);
     }
     parse(stream);

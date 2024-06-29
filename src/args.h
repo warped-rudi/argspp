@@ -60,17 +60,17 @@ namespace args {
 
             // Parse the application's command line arguments.
             void parse(int argc, char **argv);
-            void parse(std::vector<std::string> args);
+            void parse(std::vector<std::string> const& args);
 
             // Retrieve flag and option values.
             bool found(std::string const& name) const;
             size_t count(std::string const& name) const;
-            std::string value(std::string const& name) const;
-            std::vector<std::string> values(std::string const& name) const;
+            std::string const& value(std::string const& name) const;
+            std::vector<std::string> const& values(std::string const& name) const;
 
             // Retrieve positional arguments.
             size_t count() const;
-            std::string value(size_t index) const;
+            std::string const& value(size_t index) const;
 
             // Register a command. Returns the command's ArgParser instance.
             ArgParser& command(
@@ -81,7 +81,7 @@ namespace args {
 
             // Utilities for handling commands manually.
             bool commandFound() const;
-            std::string commandName() const;
+            std::string const& commandName() const;
             ArgParser& commandParser() const;
 
             // Print a parser instance to stdout.
