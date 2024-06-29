@@ -30,13 +30,6 @@ namespace args {
             // Stores positional arguments.
             std::vector<std::string> args;
 
-            // Application/command help text and version strings.
-            std::string helptext;
-            std::string version;
-
-            // Callback function for command parsers.
-            void (*callback)(std::string cmd_name, ArgParser& cmd_parser);
-
             // Register flags and options.
             void flag(std::string const& name);
             void option(std::string const& name,
@@ -79,8 +72,6 @@ namespace args {
                 return it != cnr.end() ? it->second.get() : nullptr;
             }
 
-            std::string command_name;
-
             void parse(ArgStream& args);
             void registerOption(std::string const& name, Option* option);
             void parseLongOption(std::string arg, ArgStream& stream);
@@ -88,6 +79,15 @@ namespace args {
             void parseEqualsOption(std::string prefix, std::string name, std::string value);
             void exitHelp();
             void exitVersion();
+
+            std::string command_name;
+
+            // Application/command help text and version strings.
+            std::string helptext;
+            std::string version;
+
+            // Callback function for command parsers.
+            void (*callback)(std::string cmd_name, ArgParser& cmd_parser);
     };
 }
 
