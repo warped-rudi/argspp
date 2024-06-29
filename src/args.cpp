@@ -91,12 +91,12 @@ void ArgParser::option(string const& name, string const& fallback) {
 // -----------------------------------------------------------------------------
 
 
-bool ArgParser::found(string const& name) {
+bool ArgParser::found(string const& name) const {
     return count(name) > 0;
 }
 
 
-int ArgParser::count(string const& name) {
+int ArgParser::count(string const& name) const {
     auto flag = lookup(flags, name);
     if (flag) {
         return flag->count;
@@ -109,7 +109,7 @@ int ArgParser::count(string const& name) {
 }
 
 
-string ArgParser::value(string const& name) {
+string ArgParser::value(string const& name) const {
     auto option = lookup(options, name);
     if (option) {
         if (!option->values.empty()) {
@@ -121,7 +121,7 @@ string ArgParser::value(string const& name) {
 }
 
 
-vector<string> ArgParser::values(string const& name) {
+vector<string> ArgParser::values(string const& name) const {
     auto option = lookup(options, name);
     return option ? option->values : vector<string>();
 }
@@ -152,18 +152,19 @@ ArgParser& ArgParser::command(
 }
 
 
-bool ArgParser::commandFound() {
+bool ArgParser::commandFound() const {
     return !command_name.empty();
 }
 
 
-string ArgParser::commandName() {
+string ArgParser::commandName() const {
     return command_name;
 }
 
 
-ArgParser& ArgParser::commandParser() {
-    return *commands[command_name];
+ArgParser& ArgParser::commandParser() const {
+    auto parser = lookup(commands, command_name);
+    return parser ? *parser : const_cast<ArgParser &>(*this);
 }
 
 
@@ -390,7 +391,7 @@ static ostream& operator<<(ostream& stream, const vector<T>& vec) {
 
 
 // Dump the parser's state to stdout.
-void ArgParser::print() {
+void ArgParser::print() const {
     cout << "Options:\n";
     if (!options.empty()) {
         for (auto element: options) {

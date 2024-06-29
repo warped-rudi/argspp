@@ -47,10 +47,10 @@ namespace args {
             void parse(std::vector<std::string> args);
 
             // Retrieve flag and option values.
-            bool found(std::string const& name);
-            int count(std::string const& name);
-            std::string value(std::string const& name);
-            std::vector<std::string> values(std::string const& name);
+            bool found(std::string const& name) const;
+            int count(std::string const& name) const;
+            std::string value(std::string const& name) const;
+            std::vector<std::string> values(std::string const& name) const;
 
             // Register a command. Returns the command's ArgParser instance.
             ArgParser& command(
@@ -60,12 +60,12 @@ namespace args {
             );
 
             // Utilities for handling commands manually.
-            bool commandFound();
-            std::string commandName();
-            ArgParser& commandParser();
+            bool commandFound() const;
+            std::string commandName() const;
+            ArgParser& commandParser() const;
 
             // Print a parser instance to stdout.
-            void print();
+            void print() const;
 
         private:
             std::map<std::string, std::shared_ptr<Option> > options;
