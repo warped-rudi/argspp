@@ -61,7 +61,7 @@ struct ArgParser::ArgStream {
 
 void ArgParser::flag(string const& name) {
     auto flag = make_shared<Flag>();
-    stringstream stream(name);
+    istringstream stream(name);
     string alias;
     while (stream >> alias) {
         flags[alias] = flag;
@@ -72,7 +72,7 @@ void ArgParser::flag(string const& name) {
 void ArgParser::option(string const& name, string const& fallback) {
     auto option = make_shared<Option>();
     option->fallback = fallback;
-    stringstream stream(name);
+    istringstream stream(name);
     string alias;
     while (stream >> alias) {
         options[alias] = option;
@@ -143,7 +143,7 @@ ArgParser& ArgParser::command(
     parser->helptext = helptext;
     parser->callback = callback;
 
-    stringstream stream(name);
+    istringstream stream(name);
     string alias;
 
     while (stream >> alias) {
