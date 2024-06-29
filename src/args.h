@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <sstream>
 
 namespace args {
 
@@ -20,6 +21,12 @@ namespace args {
         struct Flag;
         struct Option;
         struct ArgStream;
+
+        struct OutputContext {
+            std::ostringstream buf;
+            virtual ~OutputContext() {}
+            virtual int flush(bool is_error);
+        };
 
         using Callback = void (*)(std::string cmd_name, ArgParser& cmd_parser);
 
@@ -31,6 +38,20 @@ namespace args {
 
             // Stores positional arguments.
             std::vector<std::string> args;
+
+            // Redirect help and error messages.
+            template<typename ClosureT>
+            void setOutput(ClosureT const& c) {
+                struct OutputContextEx : OutputContext, ClosureT {
+                    OutputContextEx(ClosureT const& c) : ClosureT(c) {}
+                    virtual int flush(bool is_error) {
+                        return this->operator()(buf.str(), is_error);
+                    }
+                };
+
+                if (!octx)
+                    octx.reset(new OutputContextEx(c));
+            }
 
             // Register flags and options.
             void flag(std::string const& name);
@@ -95,6 +116,9 @@ namespace args {
 
             // Callback function for command parsers.
             Callback    callback;
+
+            // Message buffer.
+            std::shared_ptr<OutputContext> octx;
     };
 }
 

@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <sstream>
 #include <deque>
 
 using namespace std;
@@ -80,6 +79,13 @@ void ArgParser::option(string const& name, string const& fallback) {
 }
 
 
+int ArgParser::OutputContext::flush(bool is_error) {
+    std::ostream &strm = is_error ? std::cerr : std::cout;
+    strm << buf.str();
+    return static_cast<int>( is_error );
+}
+
+
 // -----------------------------------------------------------------------------
 // ArgParser: retrieve values.
 // -----------------------------------------------------------------------------
@@ -143,6 +149,11 @@ ArgParser& ArgParser::command(
     parser->helptext = helptext;
     parser->callback = callback;
 
+    if (!octx) {
+        octx.reset(new OutputContext());
+    }
+    parser->octx = octx;
+
     istringstream stream(name);
     string alias;
 
@@ -182,11 +193,11 @@ void ArgParser::parseEqualsOption(string prefix, string name, string value) {
         if (!value.empty()) {
             option->values.push_back(value);
         } else {
-            cerr << "Error: missing value for " << prefix << name << ".\n";
+            octx->buf << "Error: missing value for " << prefix << name << ".\n";
             exitError();
         }
     } else {
-        cerr << "Error: " << prefix << name << " is not a recognised option.\n";
+        octx->buf << "Error: " << prefix << name << " is not a recognised option.\n";
         exitError();
     }
 }
@@ -212,7 +223,7 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
             option->values.push_back(stream.next());
             return;
         } else {
-            cerr << "Error: missing argument for --" << arg << ".\n";
+            octx->buf << "Error: missing argument for --" << arg << ".\n";
             exitError();
         }
     }
@@ -225,7 +236,7 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
         exitVersion();
     }
 
-    cerr << "Error: --" << arg << " is not a recognised flag or option.\n";
+    octx->buf << "Error: --" << arg << " is not a recognised flag or option.\n";
     exitError();
 }
 
@@ -254,9 +265,9 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
                 continue;
             } else {
                 if (arg.size() > 1) {
-                    cerr << "Error: missing argument for '" << c << "' in -" << arg << ".\n";
+                    octx->buf << "Error: missing argument for '" << c << "' in -" << arg << ".\n";
                 } else {
-                    cerr << "Error: missing argument for -" << c << ".\n";
+                    octx->buf << "Error: missing argument for -" << c << ".\n";
                 }
                 exitError();
             }
@@ -271,9 +282,9 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
         }
 
         if (arg.size() > 1) {
-            cerr << "Error: '" << c << "' in -" << arg << " is not a recognised flag or option.\n";
+            octx->buf << "Error: '" << c << "' in -" << arg << " is not a recognised flag or option.\n";
         } else {
-            cerr << "Error: -" << c << " is not a recognised flag or option.\n";
+            octx->buf << "Error: -" << c << " is not a recognised flag or option.\n";
         }
         exitError();
     }
@@ -283,6 +294,10 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
 // Parse a stream of string arguments.
 void ArgParser::parse(ArgStream& stream) {
     bool is_first_arg = true;
+
+    if (!octx) {
+        octx.reset(new OutputContext());
+    }
 
     while (stream.hasNext()) {
         string arg = stream.next();
@@ -330,13 +345,13 @@ void ArgParser::parse(ArgStream& stream) {
                 string name = stream.next();
                 command_parser = lookup(commands, name);
                 if (!command_parser) {
-                    cerr << "Error: '" << name << "' is not a recognised command.\n";
+                    octx->buf << "Error: '" << name << "' is not a recognised command.\n";
                     exitError();
                 } else {
                     command_parser->exitHelp();
                 }
             } else {
-                cerr << "Error: the help command requires an argument.\n";
+                octx->buf << "Error: the help command requires an argument.\n";
                 exitError();
             }
         }
@@ -436,20 +451,20 @@ void ArgParser::print() const {
 
 // Print the parser's help text and exit.
 void ArgParser::exitHelp() {
-    cout << helptext << endl;
-    exit(0);
+    octx->buf << helptext << '\n';
+    exit(octx->flush(false));
 }
 
 
 // Print the parser's version string and exit.
 void ArgParser::exitVersion() {
-    cout << version << endl;
-    exit(0);
+    octx->buf << version << '\n';
+    exit(octx->flush(false));
 }
 
 
 // Exit indicating an error.
 void ArgParser::exitError() {
-    exit(1);
+    exit(octx->flush(true));
 }
 
