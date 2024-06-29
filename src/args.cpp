@@ -92,13 +92,7 @@ void ArgParser::option(string const& name, string const& fallback) {
 
 
 bool ArgParser::found(string const& name) {
-    if (flags.count(name) > 0) {
-        return flags[name]->count > 0;
-    }
-    if (options.count(name) > 0) {
-        return options[name]->values.size() > 0;
-    }
-    return false;
+    return count(name) > 0;
 }
 
 
