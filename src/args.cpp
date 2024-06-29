@@ -20,7 +20,7 @@ using namespace args;
 
 
 struct ArgParser::Flag {
-    int count = 0;
+    size_t count = 0;
 };
 
 
@@ -90,7 +90,7 @@ bool ArgParser::found(string const& name) const {
 }
 
 
-int ArgParser::count(string const& name) const {
+size_t ArgParser::count(string const& name) const {
     auto flag = lookup(flags, name);
     if (flag) {
         return flag->count;
@@ -121,7 +121,7 @@ vector<string> ArgParser::values(string const& name) const {
 }
 
 
-int ArgParser::count() const {
+size_t ArgParser::count() const {
     return args.size();
 }
 

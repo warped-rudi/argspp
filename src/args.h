@@ -43,12 +43,12 @@ namespace args {
 
             // Retrieve flag and option values.
             bool found(std::string const& name) const;
-            int count(std::string const& name) const;
+            size_t count(std::string const& name) const;
             std::string value(std::string const& name) const;
             std::vector<std::string> values(std::string const& name) const;
 
             // Retrieve positional arguments.
-            int count() const;
+            size_t count() const;
             std::string value(size_t index) const;
 
             // Register a command. Returns the command's ArgParser instance.
