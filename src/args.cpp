@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <deque>
 
@@ -19,13 +20,18 @@ using namespace args;
 
 
 struct ArgParser::Flag {
-    size_t count = 0;
+    size_t count;
+    string hinttext;
+    Flag(string const& hint) : count(0), hinttext(hint) {}
 };
 
 
 struct ArgParser::Option {
     vector<string> values;
     string fallback;
+    string hinttext;
+    Option(string const& defVal, string const& hint)
+        : fallback(defVal), hinttext(hint) {}
 };
 
 
@@ -58,8 +64,8 @@ struct ArgParser::ArgStream {
 // -----------------------------------------------------------------------------
 
 
-void ArgParser::flag(string const& name) {
-    auto flag = make_shared<Flag>();
+void ArgParser::flag(string const& name, string const& hint) {
+    auto flag = make_shared<Flag>(hint);
     istringstream stream(name);
     string alias;
     while (stream >> alias) {
@@ -68,9 +74,8 @@ void ArgParser::flag(string const& name) {
 }
 
 
-void ArgParser::option(string const& name, string const& fallback) {
-    auto option = make_shared<Option>();
-    option->fallback = fallback;
+void ArgParser::option(string const& name, string const& fallback, string const& hint) {
+    auto option = make_shared<Option>(fallback, hint);
     istringstream stream(name);
     string alias;
     while (stream >> alias) {
@@ -151,12 +156,12 @@ string const& ArgParser::value(size_t index) const {
 // -----------------------------------------------------------------------------
 
 
-ArgParser& ArgParser::command(
-    string const& name, string const& helptext, Callback callback) {
-
-    auto parser = make_shared<ArgParser>();
-    parser->helptext = helptext;
+ArgParser& ArgParser::command(string const& name,
+                              string const& helptext,
+                              Callback callback, string const& hint) {
+    auto parser = make_shared<ArgParser>(helptext);
     parser->callback = callback;
+    parser->hinttext = hint;
 
     if (!octx) {
         octx.reset(new OutputContext());
@@ -214,7 +219,7 @@ void ArgParser::parseEqualsOption(string prefix, string name, string value) {
 
 // Parse a long-form option, i.e. an option beginning with a double dash.
 void ArgParser::parseLongOption(string arg, ArgStream& stream) {
-    size_t pos = arg.find("=");
+    size_t pos = arg.find('=');
     if (pos != string::npos) {
         parseEqualsOption("--", arg.substr(0, pos), arg.substr(pos + 1));
         return;
@@ -252,7 +257,7 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
 
 // Parse a short-form option, i.e. an option beginning with a single dash.
 void ArgParser::parseShortOption(string arg, ArgStream& stream) {
-    size_t pos = arg.find("=");
+    size_t pos = arg.find('=');
     if (pos != string::npos) {
         parseEqualsOption("-", arg.substr(0, pos), arg.substr(pos + 1));
         return;
@@ -420,7 +425,7 @@ static ostream& operator<<(ostream& stream, const vector<T>& vec) {
 void ArgParser::print() const {
     cout << "Options:\n";
     if (!options.empty()) {
-        for (auto element: options) {
+        for (auto& element: options) {
             cout << "  " << element.first << ": ";
             Option *option = element.second.get();
             cout << "(" << option->fallback << ") ";
@@ -433,7 +438,7 @@ void ArgParser::print() const {
 
     cout << "\nFlags:\n";
     if (!flags.empty()) {
-        for (auto element: flags) {
+        for (auto& element: flags) {
             cout << "  " << element.first << ": " << element.second->count << "\n";
         }
     } else {
@@ -442,8 +447,8 @@ void ArgParser::print() const {
 
     cout << "\nArguments:\n";
     if (!args.empty()) {
-        for (auto arg: args) {
-            cout << "  " << arg << "\n";
+        for (auto& arg: args) {
+            cout << "  " << arg << '\n';
         }
     } else {
         cout << "  [none]\n";
@@ -451,16 +456,112 @@ void ArgParser::print() const {
 
     cout << "\nCommand:\n";
     if (commandFound()) {
-        cout << "  " << command_name << "\n";
+        cout << "  " << command_name << '\n';
     } else {
         cout << "  [none]\n";
     }
 }
 
 
+// Extract unique hint messages from a container.
+template<typename SmartPtrT>
+void ArgParser::collectHints(
+        map<string, SmartPtrT> const& cnr, size_t& width, HintMap& hints)
+{
+    using ObjectType = typename SmartPtrT::element_type;
+
+    for (auto& element : cnr ) {
+        string const* msg = &element.second->hinttext;
+
+        if (!msg->empty()) {
+            auto it = hints.find( msg );
+            string name = element.first;
+
+            if (!is_same<ObjectType, ArgParser>::value) {
+                name.insert(0, name.length() == 1 ? 1 : 2, '-');
+
+                if (is_same<ObjectType, Option>::value)
+                    name.append(name[1] == '-' ? "=<arg>" : " <arg>");
+            }
+
+            if (it == hints.end())
+                it = hints.emplace(make_pair(msg, name)).first;
+            else
+                it->second.append(", ").append(name);
+
+            width = max(width, it->second.length());
+        }
+    };
+}
+
+
+// Helper function to print out collected help messages.
+void ArgParser::printHints(ostream& os, char const* tag,
+                           size_t width, HintMap const& hints) {
+    if(!hints.empty()) {
+        os << tag;
+
+        for (auto& item : hints ) {
+            size_t padLen = item.second.length() < width ?
+                            width - item.second.length() : 0;
+            size_t pos = 0;
+            const string& text = *item.first;
+
+            do {
+                size_t next = text.find('\n', pos);
+                if (next == string::npos)
+                    next = text.size();
+
+                if (pos == 0)
+                    os << "  " << item.second;
+
+                os << string(padLen, ' ')
+                   << text.substr(pos, next - pos) << '\n';
+
+                padLen = width + 2;
+                pos = next + 1;
+            } while (pos < text.size());
+        };
+    }
+}
+
+
 // Print the parser's help text and exit.
 void ArgParser::exitHelp() {
+    HintMap hints;
+    size_t width = 0;
+
     octx->buf << helptext << '\n';
+
+    if (!commands.empty()) {
+        collectHints(commands, width, hints);
+        printHints(octx->buf, "\nCommands:\n", width + 2, hints);
+        hints.clear();
+        width = 0;
+    }
+
+    collectHints(flags, width, hints);
+    collectHints(options, width, hints);
+
+    if (!version.empty()) {
+        static char const* versionopts = "-v, --version";
+        static const string versionhelp = "Show program version";
+
+        hints.emplace(make_pair(&versionhelp, versionopts));
+        width = max(width, strlen(versionopts));
+    }
+
+    if (!helptext.empty()) {
+        static char const* helpopts = "-h, --help";
+        static const string helphelp = "Show this help text";
+
+        hints.emplace(make_pair(&helphelp, helpopts));
+        width = max(width, strlen(helpopts));
+    }
+
+    printHints(octx->buf, "\nOptions:\n", width + 2, hints);
+    octx->buf << '\n';
+
     exit(octx->flush(false));
 }
 

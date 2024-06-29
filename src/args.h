@@ -54,9 +54,11 @@ namespace args {
             }
 
             // Register flags and options.
-            void flag(std::string const& name);
+            void flag(std::string const& name,
+                      std::string const& hint = std::string());
             void option(std::string const& name,
-                        std::string const& fallback = std::string());
+                        std::string const& fallback = std::string(),
+                        std::string const& hint = std::string());
 
             // Parse the application's command line arguments.
             void parse(int argc, char **argv);
@@ -76,7 +78,8 @@ namespace args {
             ArgParser& command(
                 std::string const& name,
                 std::string const& helptext = std::string(),
-                Callback callback = nullptr
+                Callback callback = nullptr,
+                std::string const& hint = std::string()
             );
 
             // Utilities for handling commands manually.
@@ -99,6 +102,14 @@ namespace args {
                 return it != cnr.end() ? it->second.get() : nullptr;
             }
 
+            typedef std::map<std::string const*, std::string> HintMap;
+
+            template<typename SmartPtrT>
+            static void collectHints(std::map<std::string, SmartPtrT> const& cnr,
+                                     size_t& width, HintMap& hints);
+            static void printHints(std::ostream& os, char const* tag,
+                                   size_t width, HintMap const& hints);
+
             void parse(ArgStream& args);
             void registerOption(std::string const& name, Option* option);
             void parseLongOption(std::string arg, ArgStream& stream);
@@ -113,6 +124,7 @@ namespace args {
             // Application/command help text and version strings.
             std::string helptext;
             std::string version;
+            std::string hinttext;
 
             // Callback function for command parsers.
             Callback    callback;
