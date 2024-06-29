@@ -69,10 +69,16 @@ namespace args {
             size_t count(std::string const& name) const;
             std::string const& value(std::string const& name) const;
             std::vector<std::string> const& values(std::string const& name) const;
+            std::string const& operator[](std::string const& name) const {
+                return value(name);
+            }
 
             // Retrieve positional arguments.
             size_t count() const;
             std::string const& value(size_t index) const;
+            std::string const& operator[](size_t index) const {
+                return value(index);
+            }
 
             // Register a command. Returns the command's ArgParser instance.
             ArgParser& command(
