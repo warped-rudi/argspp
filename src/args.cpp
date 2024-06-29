@@ -133,9 +133,7 @@ vector<string> ArgParser::values(string const& name) const {
 
 
 ArgParser& ArgParser::command(
-    string const& name,
-    string const& helptext,
-    void (*callback)(string cmd_name, ArgParser& cmd_parser)) {
+    string const& name, string const& helptext, Callback callback) {
 
     auto parser = make_shared<ArgParser>();
     parser->helptext = helptext;

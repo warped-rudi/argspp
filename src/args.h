@@ -21,11 +21,13 @@ namespace args {
     struct Flag;
 
     class ArgParser {
+        using Callback = void (*)(std::string cmd_name, ArgParser& cmd_parser);
+
         public:
             ArgParser(
                 std::string const& helptext = std::string(),
                 std::string const& version = std::string()
-            ) : helptext(helptext), version(version) {}
+            ) : helptext(helptext), version(version), callback(nullptr) {}
 
             // Stores positional arguments.
             std::vector<std::string> args;
@@ -49,7 +51,7 @@ namespace args {
             ArgParser& command(
                 std::string const& name,
                 std::string const& helptext = std::string(),
-                void (*callback)(std::string cmd_name, ArgParser& cmd_parser) = nullptr
+                Callback callback = nullptr
             );
 
             // Utilities for handling commands manually.
@@ -88,7 +90,7 @@ namespace args {
             std::string version;
 
             // Callback function for command parsers.
-            void (*callback)(std::string cmd_name, ArgParser& cmd_parser);
+            Callback    callback;
     };
 }
 
