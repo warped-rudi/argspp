@@ -79,6 +79,7 @@ namespace args {
             void parseEqualsOption(std::string prefix, std::string name, std::string value);
             void exitHelp();
             void exitVersion();
+            void exitError();
 
             std::string command_name;
 

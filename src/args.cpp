@@ -181,11 +181,11 @@ void ArgParser::parseEqualsOption(string prefix, string name, string value) {
             option->values.push_back(value);
         } else {
             cerr << "Error: missing value for " << prefix << name << ".\n";
-            exit(1);
+            exitError();
         }
     } else {
         cerr << "Error: " << prefix << name << " is not a recognised option.\n";
-        exit(1);
+        exitError();
     }
 }
 
@@ -211,7 +211,7 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
             return;
         } else {
             cerr << "Error: missing argument for --" << arg << ".\n";
-            exit(1);
+            exitError();
         }
     }
 
@@ -224,7 +224,7 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
     }
 
     cerr << "Error: --" << arg << " is not a recognised flag or option.\n";
-    exit(1);
+    exitError();
 }
 
 
@@ -256,7 +256,7 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
                 } else {
                     cerr << "Error: missing argument for -" << c << ".\n";
                 }
-                exit(1);
+                exitError();
             }
         }
 
@@ -273,7 +273,7 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
         } else {
             cerr << "Error: -" << c << " is not a recognised flag or option.\n";
         }
-        exit(1);
+        exitError();
     }
 }
 
@@ -329,13 +329,13 @@ void ArgParser::parse(ArgStream& stream) {
                 command_parser = lookup(commands, name);
                 if (!command_parser) {
                     cerr << "Error: '" << name << "' is not a recognised command.\n";
-                    exit(1);
+                    exitError();
                 } else {
                     command_parser->exitHelp();
                 }
             } else {
                 cerr << "Error: the help command requires an argument.\n";
-                exit(1);
+                exitError();
             }
         }
 
@@ -443,5 +443,11 @@ void ArgParser::exitHelp() {
 void ArgParser::exitVersion() {
     cout << version << endl;
     exit(0);
+}
+
+
+// Exit indicating an error.
+void ArgParser::exitError() {
+    exit(1);
 }
 
