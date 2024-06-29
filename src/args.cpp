@@ -56,7 +56,7 @@ string ArgStream::next() {
 
 
 bool ArgStream::hasNext() {
-    return args.size() > 0;
+    return !args.empty();
 }
 
 
@@ -109,7 +109,7 @@ int ArgParser::count(string const& name) {
 
 string ArgParser::value(string const& name) {
     if (options.count(name) > 0) {
-        if (options[name]->values.size() > 0) {
+        if (!options[name]->values.empty()) {
             return options[name]->values.back();
         }
         return options[name]->fallback;
@@ -152,7 +152,7 @@ ArgParser& ArgParser::command(
 
 
 bool ArgParser::commandFound() {
-    return command_name != "";
+    return !command_name.empty();
 }
 
 
@@ -174,7 +174,7 @@ ArgParser& ArgParser::commandParser() {
 // Parse an option of the form --name=value or -n=value.
 void ArgParser::parseEqualsOption(string prefix, string name, string value) {
     if (options.count(name) > 0) {
-        if (value.size() > 0) {
+        if (!value.empty()) {
             options[name]->values.push_back(value);
         } else {
             cerr << "Error: missing value for " << prefix << name << ".\n";
@@ -210,11 +210,11 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
         }
     }
 
-    if (arg == "help" && this->helptext != "") {
+    if (arg == "help" && !helptext.empty()) {
         exitHelp();
     }
 
-    if (arg == "version" && this->version != "") {
+    if (arg == "version" && !version.empty()) {
         exitVersion();
     }
 
@@ -253,11 +253,11 @@ void ArgParser::parseShortOption(string arg, ArgStream& stream) {
             }
         }
 
-        if (c == 'h' && this->helptext != "") {
+        if (c == 'h' && !helptext.empty()) {
             exitHelp();
         }
 
-        if (c == 'v' && this->version != "") {
+        if (c == 'v' && !version.empty()) {
             exitVersion();
         }
 
@@ -316,7 +316,7 @@ void ArgParser::parse(ArgStream& stream) {
         }
 
         // Is the argument the automatic 'help' command?
-        if (is_first_arg && arg == "help" && commands.size() > 0) {
+        if (is_first_arg && arg == "help" && !commands.empty()) {
             if (stream.hasNext()) {
                 string name = stream.next();
                 if (commands.find(name) == commands.end()) {
@@ -385,7 +385,7 @@ static ostream& operator<<(ostream& stream, const vector<T>& vec) {
 // Dump the parser's state to stdout.
 void ArgParser::print() {
     cout << "Options:\n";
-    if (options.size() > 0) {
+    if (!options.empty()) {
         for (auto element: options) {
             cout << "  " << element.first << ": ";
             Option *option = element.second.get();
@@ -398,7 +398,7 @@ void ArgParser::print() {
     }
 
     cout << "\nFlags:\n";
-    if (flags.size() > 0) {
+    if (!flags.empty()) {
         for (auto element: flags) {
             cout << "  " << element.first << ": " << element.second->count << "\n";
         }
@@ -407,7 +407,7 @@ void ArgParser::print() {
     }
 
     cout << "\nArguments:\n";
-    if (args.size() > 0) {
+    if (!args.empty()) {
         for (auto arg: args) {
             cout << "  " << arg << "\n";
         }
