@@ -381,7 +381,7 @@ template<typename T>
 static ostream& operator<<(ostream& stream, const vector<T>& vec) {
     stream << "[";
     for(size_t i = 0; i < vec.size(); ++i) {
-        if (i) cout << ", ";
+        if (i) stream << ", ";
         stream << vec[i];
     }
     stream << "]";
