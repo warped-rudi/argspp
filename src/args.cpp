@@ -127,6 +127,16 @@ vector<string> ArgParser::values(string const& name) const {
 }
 
 
+int ArgParser::count() const {
+    return args.size();
+}
+
+
+string ArgParser::value(size_t index) const {
+    return index < args.size() ? args[index] : string();
+}
+
+
 // -----------------------------------------------------------------------------
 // ArgParser: commands.
 // -----------------------------------------------------------------------------

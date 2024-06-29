@@ -47,6 +47,10 @@ namespace args {
             std::string value(std::string const& name) const;
             std::vector<std::string> values(std::string const& name) const;
 
+            // Retrieve positional arguments.
+            int count() const;
+            std::string value(size_t index) const;
+
             // Register a command. Returns the command's ArgParser instance.
             ArgParser& command(
                 std::string const& name,
