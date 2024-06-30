@@ -12,6 +12,7 @@ all::
 	@make lib
 	@make ex1
 	@make ex2
+	@make ex3
 	@make tests
 
 lib::
@@ -25,6 +26,10 @@ ex1::
 ex2::
 	@mkdir -p bin
 	$(CXX) $(CXXFLAGS) -o bin/ex2 src/example2.cpp src/args.cpp
+
+ex3::
+	@mkdir -p bin
+	$(CXX) $(CXXFLAGS) -o bin/ex3 src/example3.cpp src/args.cpp
 
 tests::
 	@mkdir -p bin
