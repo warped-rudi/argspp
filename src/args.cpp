@@ -43,8 +43,11 @@ struct ArgParser::Option {
 struct ArgParser::ArgStream {
     deque<string> args;
 
-    void append(string const& arg) {
-        args.push_back(arg);
+    template<typename IteratorT>
+    ArgStream(IteratorT begin, IteratorT end) {
+        for ( ; begin != end; ++begin) {
+            args.push_back(*begin);
+        }
     }
 
     string next() {
@@ -383,10 +386,7 @@ void ArgParser::parse(ArgStream& stream) {
 // vulnerabilities if not handled explicitly.
 void ArgParser::parse(int argc, char **argv) {
     if (argc > 1) {
-        ArgStream stream;
-        for (int i = 1; i < argc; i++) {
-            stream.append(argv[i]);
-        }
+        ArgStream stream(&argv[1], &argv[argc]);
         parse(stream);
     }
 }
@@ -394,10 +394,7 @@ void ArgParser::parse(int argc, char **argv) {
 
 // Parse a vector of string arguments.
 void ArgParser::parse(vector<string> const& args) {
-    ArgStream stream;
-    for (auto& arg: args) {
-        stream.append(arg);
-    }
+    ArgStream stream(args.begin(), args.end());
     parse(stream);
 }
 
