@@ -31,13 +31,16 @@ namespace args {
         using Callback = void (*)(std::string cmd_name, ArgParser& cmd_parser);
 
         public:
+            // Stores positional arguments.
+            std::vector<std::string> args;
+
             ArgParser(
                 std::string const& helpmsg = std::string(),
                 std::string const& version = std::string()
             ) : helptext(helpmsg), version(version), callback(nullptr) {}
 
-            // Stores positional arguments.
-            std::vector<std::string> args;
+            ArgParser(ArgParser const&) = delete;
+            ArgParser& operator = (ArgParser const&) = delete;
 
             // Redirect help and error messages.
             template<typename ClosureT>
