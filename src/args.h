@@ -32,9 +32,9 @@ namespace args {
 
         public:
             ArgParser(
-                std::string const& helptext = std::string(),
+                std::string const& helpmsg = std::string(),
                 std::string const& version = std::string()
-            ) : helptext(helptext), version(version), callback(nullptr) {}
+            ) : helptext(helpmsg), version(version), callback(nullptr) {}
 
             // Stores positional arguments.
             std::vector<std::string> args;
@@ -62,7 +62,7 @@ namespace args {
 
             // Parse the application's command line arguments.
             void parse(int argc, char **argv);
-            void parse(std::vector<std::string> const& args);
+            void parse(std::vector<std::string> const& argv);
 
             // Retrieve flag and option values.
             bool found(std::string const& name) const;
@@ -83,8 +83,8 @@ namespace args {
             // Register a command. Returns the command's ArgParser instance.
             ArgParser& command(
                 std::string const& name,
-                std::string const& helptext = std::string(),
-                Callback callback = nullptr,
+                std::string const& helpmsg = std::string(),
+                Callback callbackFn = nullptr,
                 std::string const& hint = std::string()
             );
 

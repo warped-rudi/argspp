@@ -160,10 +160,10 @@ string const& ArgParser::value(size_t index) const {
 
 
 ArgParser& ArgParser::command(string const& name,
-                              string const& helptext,
-                              Callback callback, string const& hint) {
-    auto parser = make_shared<ArgParser>(helptext);
-    parser->callback = callback;
+                              string const& helpmsg,
+                              Callback callbackFn, string const& hint) {
+    auto parser = make_shared<ArgParser>(helpmsg);
+    parser->callback = callbackFn;
     parser->hinttext = hint;
 
     if (!octx) {
@@ -393,8 +393,8 @@ void ArgParser::parse(int argc, char **argv) {
 
 
 // Parse a vector of string arguments.
-void ArgParser::parse(vector<string> const& args) {
-    ArgStream stream(args.begin(), args.end());
+void ArgParser::parse(vector<string> const& argv) {
+    ArgStream stream(argv.begin(), argv.end());
     parse(stream);
 }
 
