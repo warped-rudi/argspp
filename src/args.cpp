@@ -537,28 +537,36 @@ void ArgParser::exitHelp() {
         width = 0;
     }
 
-    collectHints(flags, width, hints);
-    collectHints(options, width, hints);
+    map<string, shared_ptr<Flag> > builtIns;
 
     if (!version.empty()) {
-        static char const* versionopts = "-v, --version";
-        static const string versionhelp = "Show program version";
+        static const char *names[] = { "v", "version" };
+        auto flag = make_shared<Flag>("Show program version");
 
-        hints.emplace(make_pair(&versionhelp, versionopts));
-        width = max(width, strlen(versionopts));
+        for (auto it = begin(names); it != end(names); ++it) {
+            if (!lookup(flags, *it) && !lookup(options, *it)) {
+                builtIns[*it] = flag;
+            }
+        }
     }
 
     if (!helptext.empty()) {
-        static char const* helpopts = "-h, --help";
-        static const string helphelp = "Show this help text";
+        static const char *names[] = { "h", "help" };
+        auto flag = make_shared<Flag>("Show this help text");
 
-        hints.emplace(make_pair(&helphelp, helpopts));
-        width = max(width, strlen(helpopts));
+        for (auto it = begin(names); it != end(names); ++it) {
+            if (!lookup(flags, *it) && !lookup(options, *it)) {
+                builtIns[*it] = flag;
+            }
+        }
     }
 
+    collectHints(flags, width, hints);
+    collectHints(options, width, hints);
+    collectHints(builtIns, width, hints);
     printHints(octx->buf, "\nOptions:\n", width + 2, hints);
-    octx->buf << '\n';
 
+    octx->buf << '\n';
     exit(octx->flush(false));
 }
 
