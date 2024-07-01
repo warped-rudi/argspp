@@ -22,6 +22,12 @@ namespace args {
         struct Option;
         struct ArgStream;
 
+        struct SizeCheck {
+            size_t size;
+            enum { no_check, check_eq, check_ge } mode;
+            bool isValid(size_t number) const;
+        };
+
         struct OutputContext {
             std::ostringstream buf;
             virtual ~OutputContext() {}
@@ -37,7 +43,7 @@ namespace args {
             ArgParser(
                 std::string const& helpmsg = std::string(),
                 std::string const& version = std::string()
-            ) : helptext(helpmsg), version(version), callback(nullptr) {}
+            ) : helptext(helpmsg), version(version), callback(nullptr), argcount() {}
 
             ArgParser(ArgParser const&) = delete;
             ArgParser& operator = (ArgParser const&) = delete;
@@ -54,6 +60,13 @@ namespace args {
 
                 if (!octx)
                     octx.reset(new OutputContextEx(c));
+            }
+
+            // Set required number of positional arguments.
+            void setArgsRequired(size_t count, bool accept_more = false) {
+                argcount.size = count;
+                argcount.mode = accept_more ? SizeCheck::check_ge :
+                                                SizeCheck::check_eq;
             }
 
             // Register flags and options.
@@ -140,6 +153,9 @@ namespace args {
 
             // Message buffer.
             std::shared_ptr<OutputContext> octx;
+
+            // Positional argument checking.
+            SizeCheck   argcount;
     };
 }
 

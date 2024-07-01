@@ -94,6 +94,13 @@ int ArgParser::OutputContext::flush(bool is_error) {
 }
 
 
+bool ArgParser::SizeCheck::isValid(size_t number) const {
+    return (mode == no_check) ||
+           (mode == check_eq && number == size) ||
+           (mode == check_ge && number >= size);
+}
+
+
 // -----------------------------------------------------------------------------
 // ArgParser: retrieve values.
 // -----------------------------------------------------------------------------
@@ -178,6 +185,8 @@ ArgParser& ArgParser::command(string const& name,
         commands[alias] = parser;
     }
 
+    argcount.size = 0;
+    argcount.mode = SizeCheck::check_eq;
     return *parser;
 }
 
@@ -376,6 +385,11 @@ void ArgParser::parse(ArgStream& stream) {
         // Otherwise add the argument to our list of positional arguments.
         args.push_back(arg);
         is_first_arg = false;
+    }
+
+    if (!argcount.isValid(args.size())) {
+        octx->buf << "Error: invalid number of arguments.\n";
+        exitError();
     }
 }
 
