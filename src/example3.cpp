@@ -17,9 +17,10 @@ int main(int argc, char **argv) {
     cmd_boo.flag("foo f", "Enable feature foo");
     cmd_boo.option("bar b", "default", "Specify the value of bar");
 
-    ArgParser& cmd_zoo = parser.command("zoo", "Usage: example zoo [Options]", nullptr, "This is command zoo");
+    ArgParser& cmd_zoo = parser.command("zoo", "Usage: example zoo [Options] arg1 ...", nullptr, "This is command zoo");
     cmd_zoo.flag("foz f", "Enable feature foz\nwhich is really, really nice");
     cmd_zoo.option("baz b", "default", "Specify the value of baz");
+    cmd_zoo.setArgsRequired(1, true);
 
     parser.parse(argc, argv);
     parser.commandParser().print();
