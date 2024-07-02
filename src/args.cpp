@@ -213,7 +213,8 @@ ArgParser& ArgParser::commandParser() const {
 
 
 // Parse an option of the form --name=value or -n=value.
-void ArgParser::parseEqualsOption(string prefix, string name, string value) {
+void ArgParser::parseEqualsOption(string const& prefix,
+                                  string const& name, string const& value) {
     auto option = lookup(options, name);
     if (option) {
         if (!value.empty()) {
@@ -230,7 +231,7 @@ void ArgParser::parseEqualsOption(string prefix, string name, string value) {
 
 
 // Parse a long-form option, i.e. an option beginning with a double dash.
-void ArgParser::parseLongOption(string arg, ArgStream& stream) {
+void ArgParser::parseLongOption(string const& arg, ArgStream& stream) {
     size_t pos = arg.find('=');
     if (pos != string::npos) {
         parseEqualsOption("--", arg.substr(0, pos), arg.substr(pos + 1));
@@ -268,14 +269,14 @@ void ArgParser::parseLongOption(string arg, ArgStream& stream) {
 
 
 // Parse a short-form option, i.e. an option beginning with a single dash.
-void ArgParser::parseShortOption(string arg, ArgStream& stream) {
+void ArgParser::parseShortOption(string const& arg, ArgStream& stream) {
     size_t pos = arg.find('=');
     if (pos != string::npos) {
         parseEqualsOption("-", arg.substr(0, pos), arg.substr(pos + 1));
         return;
     }
 
-    for (char& c: arg) {
+    for (char c: arg) {
         string name = string(1, c);
 
         auto flag = lookup(flags, name);

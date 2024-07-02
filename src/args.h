@@ -132,11 +132,11 @@ namespace args {
             static void printHints(std::ostream& os, char const* tag,
                                    size_t width, HintMap const& hints);
 
-            void parse(ArgStream& args);
-            void registerOption(std::string const& name, Option* option);
-            void parseLongOption(std::string arg, ArgStream& stream);
-            void parseShortOption(std::string arg, ArgStream& stream);
-            void parseEqualsOption(std::string prefix, std::string name, std::string value);
+            void parse(ArgStream& stream);
+            void parseLongOption(std::string const& arg, ArgStream& stream);
+            void parseShortOption(std::string const& arg, ArgStream& stream);
+            void parseEqualsOption(std::string const& prefix,
+                                   std::string const& name, std::string const& value);
             void exitHelp();
             void exitVersion();
             void exitError();
