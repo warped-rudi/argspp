@@ -144,14 +144,9 @@ vector<string> const& ArgParser::values(string const& name) const {
 }
 
 
-size_t ArgParser::count() const {
-    return args.size();
-}
-
-
-string const& ArgParser::value(size_t index) const {
-    if (index < args.size()) {
-        return args[index];
+string const& ArgParser::arg(size_t index) const {
+    if (index < pos_args.size()) {
+        return pos_args[index];
     }
     static const string empty;
     return empty;
@@ -329,7 +324,7 @@ void ArgParser::parse(ArgStream& stream) {
         // If we enounter a '--', turn off option parsing.
         if (arg == "--") {
             while (stream.hasNext()) {
-                args.push_back(stream.next());
+                pos_args.push_back(stream.next());
             }
             continue;
         }
@@ -345,7 +340,7 @@ void ArgParser::parse(ArgStream& stream) {
         // it as a positional argument.
         if (arg[0] == '-') {
             if (arg.size() == 1 || isdigit(arg[1])) {
-                args.push_back(arg);
+                pos_args.push_back(arg);
             } else {
                 parseShortOption(arg.substr(1), stream);
             }
@@ -381,11 +376,11 @@ void ArgParser::parse(ArgStream& stream) {
         }
 
         // Otherwise add the argument to our list of positional arguments.
-        args.push_back(arg);
+        pos_args.push_back(arg);
         is_first_arg = false;
     }
 
-    if (!argcount.isValid(args.size())) {
+    if (!argcount.isValid(pos_args.size())) {
         octx->buf << "Error: invalid number of arguments.\n";
         exitError();
     }
@@ -454,8 +449,8 @@ void ArgParser::print() const {
     }
 
     cout << "\nArguments:\n";
-    if (!args.empty()) {
-        for (auto& arg: args) {
+    if (!pos_args.empty()) {
+        for (auto& arg: pos_args) {
             cout << "  " << arg << '\n';
         }
     } else {

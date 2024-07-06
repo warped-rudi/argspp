@@ -129,9 +129,9 @@ void test_option_multi() {
 void test_pos_args() {
     ArgParser parser;
     parser.parse(vector<string>({"abc", "def"}));
-    assert(parser.args.size() == 2);
-    assert(parser.args[0] == "abc");
-    assert(parser.args[1] == "def");
+    assert(parser.args().size() == 2);
+    assert(parser.arg(0) == "abc");
+    assert(parser.arg(1) == "def");
     printf(".");
 }
 
@@ -142,7 +142,7 @@ void test_pos_args() {
 void test_option_parsing_switch() {
     ArgParser parser;
     parser.parse(vector<string>({"foo", "--", "--bar", "--baz"}));
-    assert(parser.args.size() == 3);
+    assert(parser.args().size() == 3);
     printf(".");
 }
 
@@ -158,7 +158,7 @@ void test_command() {
     parser.parse(vector<string>({"boo", "abc", "def", "--foo", "--bar", "baz"}));
     assert(parser.commandFound());
     assert(parser.commandName() == "boo");
-    assert(cmd_parser.args.size() == 2);
+    assert(cmd_parser.args().size() == 2);
     assert(cmd_parser.found("foo"));
     assert(cmd_parser.value("bar") == "baz");
     printf(".");

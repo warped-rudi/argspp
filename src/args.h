@@ -39,9 +39,6 @@ namespace args {
                                   ArgParser const& cmd_parser);
 
         public:
-            // Stores positional arguments.
-            std::vector<std::string> args;
-
             ArgParser(
                 std::string const& helpmsg = std::string(),
                 std::string const& version = std::string()
@@ -92,10 +89,12 @@ namespace args {
             }
 
             // Retrieve positional arguments.
-            size_t count() const;
-            std::string const& value(size_t index) const;
+            std::string const& arg(size_t index) const;
+            std::vector<std::string> const& args() const {
+                return pos_args;
+            };
             std::string const& operator[](size_t index) const {
-                return value(index);
+                return arg(index);
             }
 
             // Register a command. Returns the command's ArgParser instance.
@@ -158,6 +157,9 @@ namespace args {
 
             // Positional argument checking.
             SizeCheck   argcount;
+
+            // Stores positional arguments.
+            std::vector<std::string> pos_args;
     };
 }
 
