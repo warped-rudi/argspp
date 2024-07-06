@@ -477,8 +477,8 @@ void ArgParser::print() const {
 
 // Extract unique hint messages from a container.
 template<typename SmartPtrT>
-void ArgParser::collectHints(
-        map<string, SmartPtrT> const& cnr, size_t& width, HintMap& hints)
+void ArgParser::collectHints(map<string, SmartPtrT> const& cnr,
+                             size_t& width, list<HintItem>& hints)
 {
     using ObjectType = typename SmartPtrT::element_type;
 
@@ -486,9 +486,7 @@ void ArgParser::collectHints(
         string const* msg = &element.second->hinttext;
 
         if (!msg->empty()) {
-            auto it = hints.find( msg );
             string name = element.first;
-
             if (!is_same<ObjectType, ArgParser>::value) {
                 name.insert(0, name.length() == 1 ? 1 : 2, '-');
 
@@ -496,10 +494,23 @@ void ArgParser::collectHints(
                     name.append(name[1] == '-' ? "=<arg>" : " <arg>");
             }
 
-            if (it == hints.end())
-                it = hints.emplace(make_pair(msg, name)).first;
-            else
+            auto it = find_if(hints.begin(), hints.end(),
+                              [msg](HintItem const& hi)
+            {
+                return hi.first == msg;
+            });
+
+            if (it == hints.end()) {
+                it = find_if(hints.begin(), hints.end(),
+                             [&name](HintItem const& hi)
+                {
+                    return hi.second > name;
+                });
+
+                it = hints.emplace(it, msg, name);
+            } else {
                 it->second.append(", ").append(name);
+            }
 
             width = max(width, it->second.length());
         }
@@ -509,14 +520,14 @@ void ArgParser::collectHints(
 
 // Helper function to print out collected help messages.
 void ArgParser::printHints(ostream& os, char const* tag,
-                           size_t width, HintMap const& hints) {
+                           size_t width, list<HintItem> const& hints) {
     if(!hints.empty()) {
         os << tag;
 
         for (auto& item : hints ) {
-            size_t padLen = item.second.length() < width ?
-                            width - item.second.length() : 0;
             size_t pos = 0;
+            size_t padLen = item.second.length() < width ?
+                                width - item.second.length() : 0;
             const string& text = *item.first;
 
             do {
@@ -540,8 +551,8 @@ void ArgParser::printHints(ostream& os, char const* tag,
 
 // Print the parser's help text and exit.
 void ArgParser::exitHelp() {
-    HintMap hints;
     size_t width = 0;
+    list<HintItem> hints;
 
     octx->buf << helptext << '\n';
 

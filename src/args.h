@@ -10,6 +10,7 @@
 #define args_h
 
 #include <map>
+#include <list>
 #include <string>
 #include <vector>
 #include <memory>
@@ -124,13 +125,13 @@ namespace args {
                 return it != cnr.end() ? it->second.get() : nullptr;
             }
 
-            typedef std::map<std::string const*, std::string> HintMap;
+            using HintItem = std::pair<std::string const*, std::string>;
 
             template<typename SmartPtrT>
             static void collectHints(std::map<std::string, SmartPtrT> const& cnr,
-                                     size_t& width, HintMap& hints);
+                                     size_t& width, std::list<HintItem>& hints);
             static void printHints(std::ostream& os, char const* tag,
-                                   size_t width, HintMap const& hints);
+                                   size_t width, std::list<HintItem> const& hints);
 
             void parse(ArgStream& stream);
             void parseLongOption(std::string const& arg, ArgStream& stream);
