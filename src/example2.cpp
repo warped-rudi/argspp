@@ -4,8 +4,8 @@
 using namespace args;
 using namespace std;
 
-void callback(string cmd_name, ArgParser& cmd_parser) {
-    cout << "---------- boo! ----------\n";
+void callback(string const& cmd_name, ArgParser const& cmd_parser) {
+    cout << "---------- boo! ---------- (" << cmd_name << ")\n";
     cmd_parser.print();
     cout << "--------------------------\n\n";
 }

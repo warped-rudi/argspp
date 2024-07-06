@@ -201,9 +201,9 @@ string const& ArgParser::commandName() const {
 }
 
 
-ArgParser& ArgParser::commandParser() const {
+ArgParser const& ArgParser::commandParser() const {
     auto parser = lookup(commands, command_name);
-    return parser ? *parser : const_cast<ArgParser &>(*this);
+    return parser ? *parser : *this;
 }
 
 

@@ -35,7 +35,8 @@ namespace args {
             virtual int flush(bool is_error);
         };
 
-        using Callback = void (*)(std::string cmd_name, ArgParser& cmd_parser);
+        using Callback = void (*)(std::string const& cmd_name,
+                                  ArgParser const& cmd_parser);
 
         public:
             // Stores positional arguments.
@@ -108,7 +109,7 @@ namespace args {
             // Utilities for handling commands manually.
             bool commandFound() const;
             std::string const& commandName() const;
-            ArgParser& commandParser() const;
+            ArgParser const& commandParser() const;
 
             // Print a parser instance to stdout.
             void print() const;
