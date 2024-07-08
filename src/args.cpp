@@ -419,13 +419,14 @@ void ArgParser::parse(vector<string> const& argv) {
 // Override the << stream insertion operator to support vectors. This will
 // allow us to cout our lists of option values in the print() method.
 template<typename T>
-static ostream& operator<<(ostream& stream, const vector<T>& vec) {
-    stream << "[";
-    for(size_t i = 0; i < vec.size(); ++i) {
-        if (i) stream << ", ";
+static ostream& operator<<(ostream& stream, vector<T> const& vec) {
+    stream << '[';
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i)
+            stream << ", ";
         stream << vec[i];
     }
-    stream << "]";
+    stream << ']';
     return stream;
 }
 
@@ -435,11 +436,9 @@ void ArgParser::print() const {
     cout << "Options:\n";
     if (!options.empty()) {
         for (auto& element: options) {
-            cout << "  " << element.first << ": ";
-            Option *option = element.second.get();
-            cout << "(" << option->fallback << ") ";
-            cout << option->values;
-            cout << "\n";
+            const Option* option = element.second.get();
+            cout << "  " << element.first << ": (" << option->fallback << ") ";
+            cout << option->values << '\n';
         }
     } else {
         cout << "  [none]\n";
