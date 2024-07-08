@@ -4,11 +4,8 @@
 
 #include "args.h"
 
-#include <algorithm>
-#include <cctype>
-#include <cstring>
 #include <iostream>
-#include <deque>
+#include <algorithm>
 
 using namespace std;
 using namespace args;
@@ -41,7 +38,7 @@ struct ArgParser::Option {
 
 
 struct ArgParser::ArgStream {
-    deque<string> args;
+    list<string> args;
 
     template<typename IteratorT>
     ArgStream(IteratorT begin, IteratorT end) {
