@@ -103,11 +103,6 @@ bool ArgParser::SizeCheck::isValid(size_t number) const {
 // -----------------------------------------------------------------------------
 
 
-bool ArgParser::found(string const& name) const {
-    return count(name) > 0;
-}
-
-
 size_t ArgParser::count(string const& name) const {
     auto flag = lookup(flags, name);
     if (flag) {
@@ -180,22 +175,6 @@ ArgParser& ArgParser::command(string const& name,
     argcount.size = 0;
     argcount.mode = SizeCheck::check_eq;
     return *parser;
-}
-
-
-bool ArgParser::commandFound() const {
-    return !command_name.empty();
-}
-
-
-string const& ArgParser::commandName() const {
-    return command_name;
-}
-
-
-ArgParser const& ArgParser::commandParser() const {
-    auto parser = lookup(commands, command_name);
-    return parser ? *parser : *this;
 }
 
 

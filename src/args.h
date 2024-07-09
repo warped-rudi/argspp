@@ -80,7 +80,9 @@ namespace args {
             void parse(std::vector<std::string> const& argv);
 
             // Retrieve flag and option values.
-            bool found(std::string const& name) const;
+            bool found(std::string const& name) const {
+                return count(name) > 0;
+            }
             size_t count(std::string const& name) const;
             std::string const& value(std::string const& name) const;
             std::vector<std::string> const& values(std::string const& name) const;
@@ -92,7 +94,7 @@ namespace args {
             std::string const& arg(size_t index) const;
             std::vector<std::string> const& args() const {
                 return pos_args;
-            };
+            }
             std::string const& operator[](size_t index) const {
                 return arg(index);
             }
@@ -106,9 +108,16 @@ namespace args {
             );
 
             // Utilities for handling commands manually.
-            bool commandFound() const;
-            std::string const& commandName() const;
-            ArgParser const& commandParser() const;
+            bool commandFound() const {
+                return !command_name.empty();
+            }
+            std::string const& commandName() const {
+                return command_name;
+            }
+            ArgParser const& commandParser() const {
+                auto parser = lookup(commands, command_name);
+                return parser ? *parser : *this;
+            }
 
             // Print a parser instance to stdout.
             void print() const;
