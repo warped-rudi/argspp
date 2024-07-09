@@ -184,20 +184,18 @@ ArgParser& ArgParser::command(string const& name,
 
 
 // Parse an option of the form --name=value or -n=value.
-void ArgParser::parseEqualsOption(string const& prefix,
+void ArgParser::parseEqualsOption(char const* prefix,
                                   string const& name, string const& value) {
     auto option = lookup(options, name);
-    if (option) {
-        if (!value.empty()) {
-            option->values.push_back(value);
-        } else {
-            octx->buf << "Error: missing value for " << prefix << name << ".\n";
-            exitError();
-        }
-    } else {
+    if (!option) {
         octx->buf << "Error: " << prefix << name << " is not a recognised option.\n";
         exitError();
     }
+    if (value.empty()) {
+        octx->buf << "Error: missing value for " << prefix << name << ".\n";
+        exitError();
+    }
+    option->values.push_back(value);
 }
 
 
@@ -217,13 +215,12 @@ void ArgParser::parseLongOption(string const& arg, ArgStream& stream) {
 
     auto option = lookup(options, arg);
     if (option) {
-        if (stream.hasNext()) {
-            option->values.push_back(stream.next());
-            return;
-        } else {
+        if (!stream.hasNext()) {
             octx->buf << "Error: missing argument for --" << arg << ".\n";
             exitError();
         }
+        option->values.push_back(stream.next());
+        return;
     }
 
     if (arg == "help" && !helptext.empty()) {
@@ -258,10 +255,7 @@ void ArgParser::parseShortOption(string const& arg, ArgStream& stream) {
 
         auto option = lookup(options, name);
         if (option) {
-            if (stream.hasNext()) {
-                option->values.push_back(stream.next());
-                continue;
-            } else {
+            if (!stream.hasNext()) {
                 if (arg.size() > 1) {
                     octx->buf << "Error: missing argument for '" << c << "' in -" << arg << ".\n";
                 } else {
@@ -269,6 +263,8 @@ void ArgParser::parseShortOption(string const& arg, ArgStream& stream) {
                 }
                 exitError();
             }
+            option->values.push_back(stream.next());
+            continue;
         }
 
         if (c == 'h' && !helptext.empty()) {

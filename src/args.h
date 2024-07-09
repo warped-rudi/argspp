@@ -145,7 +145,7 @@ namespace args {
             void parse(ArgStream& stream);
             void parseLongOption(std::string const& arg, ArgStream& stream);
             void parseShortOption(std::string const& arg, ArgStream& stream);
-            void parseEqualsOption(std::string const& prefix,
+            void parseEqualsOption(char const* prefix,
                                    std::string const& name, std::string const& value);
             void exitHelp();
             void exitVersion();
