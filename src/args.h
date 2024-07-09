@@ -147,9 +147,10 @@ namespace args {
             void parseShortOption(std::string const& arg, ArgStream& stream);
             void parseEqualsOption(char const* prefix,
                                    std::string const& name, std::string const& value);
-            void exitHelp();
-            void exitVersion();
-            void exitError();
+
+            [[noreturn]] void exitHelp();
+            [[noreturn]] void exitVersion();
+            [[noreturn]] void exitError();
 
             std::string command_name;
 
